@@ -35,7 +35,7 @@ class Router {
                         <h1>Welcome to Turquoise Penguin</h1>
                     </div>
                     <div class="hero-image">
-                        <img src="assets/images/profile-pic.png" alt="Parsa Hadidi" class="profile-picture">
+                        <img src="assets/images/profile-pic.jpg" alt="Parsa Hadidi" class="profile-picture">
                     </div>
                     <div class="hero-text-bottom">
                         <p>Software Engineer with background in cloud deployments & integrations</p>
