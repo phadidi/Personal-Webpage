@@ -61,11 +61,9 @@ Resources:
         Enabled: true
         Origins:
           - Id: S3Origin
-            DomainName: !GetAtt S3Bucket.RegionalDomainName
-            CustomOriginConfig:
-              HTTPPort: 80
-              HTTPSPort: 443
-              OriginProtocolPolicy: http-only
+            DomainName: !GetAtt S3Bucket.DomainName
+            S3OriginConfig:
+              OriginAccessIdentity: ''
         PriceClass: PriceClass_100
         ViewerCertificate:
           AcmCertificateArn: !Ref SSLCertificate
