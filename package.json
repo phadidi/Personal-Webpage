@@ -1,0 +1,17 @@
+{
+  "name": "turquoise-penguin-portfolio",
+  "version": "1.0.0",
+  "description": "Personal portfolio website with dark mode",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx serve .",
+    "build": "echo 'Static site - no build needed'",
+    "deploy": "npm run build"
+  },
+  "keywords": ["portfolio", "webapp", "javascript"],
+  "author": "Turquoise Penguin",
+  "license": "MIT",
+  "devDependencies": {
+    "serve": "^14.2.1"
+  }
+}
