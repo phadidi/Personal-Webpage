@@ -15,6 +15,8 @@ class Router {
       this.currentPage = page;
       document.getElementById('app').innerHTML = this.routes[page]();
       this.updateActiveNav(page);
+      window.history.pushState({ page }, '', `#${page}`);
+      localStorage.setItem('currentPage', page);
     }
   }
 
@@ -76,7 +78,7 @@ class Router {
                     <div class="about-content">
                         <div class="about-text">
                             <p>Hi, I'm Parsa, a software engineer with past certifications in AWS & experience developing applications as an Agile Scrum individual contributor using Blazor, ASP.NET, C#, SQL Stored Procedures, Java, XML, JavaScript, React, TypeScript, Node.js, AWS Lambda, & Serverless YAML. I have technical experience in full stack application development & information security practices, plus SnapLogic integrations with legacy systems and PowerShell scripting for batch file copy operations.</p>
-                            <p><a href="#" onclick="router.navigate('resume')" class="resume-link">View my resume here</a></p>
+                            <p><a href="#resume" onclick="router.navigate('resume'); return false;" class="resume-link">View my resume here</a></p>
                         </div>
                         <div class="certifications-section">
                             <h3>My Certifications</h3>
@@ -238,8 +240,18 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 
-  // Load initial page
-  router.navigate('home');
+  // Load initial page from URL hash or localStorage
+  const hash = window.location.hash.slice(1);
+  const savedPage = localStorage.getItem('currentPage');
+  // If no hash in URL, go to home (ignores localStorage)
+  const initialPage = hash || (window.location.hash === '' ? 'home' : savedPage) || 'home';
+  router.navigate(initialPage);
+
+  // Handle browser back/forward buttons
+  window.addEventListener('popstate', (e) => {
+    const page = e.state?.page || window.location.hash.slice(1) || 'home';
+    router.navigate(page);
+  });
 
   // Hamburger menu toggle
   const hamburgerMenu = document.getElementById('hamburgerMenu');
