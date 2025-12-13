@@ -262,4 +262,15 @@ document.addEventListener('DOMContentLoaded', function () {
       navMenu.classList.toggle('active');
     });
   }
+
+  // Make contact-method divs clickable
+  document.addEventListener('click', function (e) {
+    const contactMethod = e.target.closest('.contact-method');
+    if (contactMethod) {
+      const link = contactMethod.querySelector('a');
+      if (link && !e.target.closest('a')) {
+        link.click();
+      }
+    }
+  });
 });
