@@ -2,55 +2,112 @@ name: Deploy turquoisepenguin.com to AWS
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [main, master]
   workflow_dispatch:
 
 env:
   AWS_REGION: us-east-1
   S3_BUCKET: turquoisepenguin.com
+  STACK_NAME: turquoisepenguin-api
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-    
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v4
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ${{ env.AWS_REGION }}
-    
-    - name: Deploy to S3
-      run: |
-        aws s3 sync . s3://${{ env.S3_BUCKET }} \
-          --delete \
-          --exclude ".git/*" \
-          --exclude ".github/*" \
-          --exclude "*.md" \
-          --exclude "node_modules/*" \
-          --exclude "*.yml" \
-          --exclude "*.json" \
-          --exclude ".gitignore" \
-          --exclude "deploy.bat" \
-          --cache-control "public, max-age=31536000" \
-          --exclude "index.html" \
-          --exclude "*.js" \
-          --exclude "*.css"
-        
-        # Upload HTML, JS, CSS with shorter cache for updates
-        aws s3 sync . s3://${{ env.S3_BUCKET }} \
-          --exclude "*" \
-          --include "*.html" \
-          --include "*.js" \
-          --include "*.css" \
-          --cache-control "public, max-age=86400"
-    
-    - name: Invalidate CloudFront cache
-      run: |
-        aws cloudfront create-invalidation \
-          --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} \
-          --paths "/*"
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      # ----------------------------
+      # Install dependencies
+      # ----------------------------
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install Lambda dependencies
+        run: |
+          cd lambda
+          npm install --production
+          cd ..
+
+      # ----------------------------
+      # Deploy Lambda & API Gateway
+      # ----------------------------
+      - name: Setup SAM CLI
+        uses: aws-actions/setup-sam@v2
+
+      - name: Deploy Lambda and API Gateway
+        run: |
+          sam build
+          sam deploy \
+            --stack-name ${{ env.STACK_NAME }} \
+            --parameter-overrides OpenAIApiKey=${{ secrets.OPENAI_API_KEY }} \
+            --capabilities CAPABILITY_IAM \
+            --no-confirm-changeset \
+            --no-fail-on-empty-changeset
+
+      - name: Get API Endpoint
+        id: api-endpoint
+        run: |
+          API_URL=$(aws cloudformation describe-stacks \
+            --stack-name ${{ env.STACK_NAME }} \
+            --query 'Stacks[0].Outputs[?OutputKey==`ApiEndpoint`].OutputValue' \
+            --output text)
+          echo "API_URL=$API_URL" >> $GITHUB_OUTPUT
+
+      - name: Update script.js with API endpoint
+        run: |
+          sed -i "s|/.netlify/functions/rewrite|${{ steps.api-endpoint.outputs.API_URL }}|g" script.js
+
+      - name: Update config.js with API endpoint
+        run: |
+          echo "const API_CONFIG = { REWRITE_ENDPOINT: '${{ steps.api-endpoint.outputs.API_URL }}' };" > config.js
+
+      # ----------------------------
+      # Deploy static files to S3
+      # ----------------------------
+      - name: Deploy to S3
+        run: |
+          aws s3 sync . s3://${{ env.S3_BUCKET }} \
+            --delete \
+            --exclude ".git/*" \
+            --exclude ".github/*" \
+            --exclude "*.md" \
+            --exclude "node_modules/*" \
+            --exclude "*.yml" \
+            --exclude "*.yaml" \
+            --exclude "*.json" \
+            --exclude ".gitignore" \
+            --exclude "deploy.bat" \
+            --exclude "lambda/*" \
+            --exclude "netlify/*" \
+            --exclude ".aws-sam/*" \
+            --cache-control "public, max-age=31536000" \
+            --exclude "index.html" \
+            --exclude "*.js" \
+            --exclude "*.css"
+
+          aws s3 sync . s3://${{ env.S3_BUCKET }} \
+            --exclude "*" \
+            --include "*.html" \
+            --include "*.js" \
+            --include "*.css" \
+            --cache-control "public, max-age=86400"
+
+      # ----------------------------
+      # Invalidate CloudFront cache
+      # ----------------------------
+      - name: Invalidate CloudFront cache
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} \
+            --paths "/*"

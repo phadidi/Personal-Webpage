@@ -1,0 +1,46 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Rewrite Lambda Function with API Gateway
+
+Parameters:
+  OpenAIApiKey:
+    Type: String
+    NoEcho: true
+    Description: OpenAI API Key
+
+Resources:
+  RewriteFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: turquoisepenguin-rewrite
+      Handler: rewrite.handler
+      Runtime: nodejs18.x
+      CodeUri: lambda/
+      MemorySize: 256
+      Timeout: 30
+      Environment:
+        Variables:
+          OPENAI_API_KEY: !Ref OpenAIApiKey
+      Events:
+        RewriteApi:
+          Type: Api
+          Properties:
+            Path: /rewrite
+            Method: post
+            RestApiId: !Ref RewriteApi
+
+  RewriteApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: prod
+      Cors:
+        AllowOrigin: "'*'"
+        AllowHeaders: "'Content-Type'"
+        AllowMethods: "'POST,OPTIONS'"
+
+Outputs:
+  ApiEndpoint:
+    Description: API Gateway endpoint URL
+    Value: !Sub 'https://${RewriteApi}.execute-api.${AWS::Region}.amazonaws.com/prod/rewrite'
+    Export:
+      Name: RewriteApiEndpoint

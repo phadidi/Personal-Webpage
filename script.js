@@ -6,6 +6,7 @@ class Router {
       about: this.renderAbout,
       resume: this.renderResume,
       contact: this.renderContact,
+      tone: this.renderToneTips,
     };
     this.currentPage = 'home';
   }
@@ -207,6 +208,42 @@ class Router {
             </section>
         `;
   }
+
+  renderToneTips() {
+    return `
+    <section class="page-content">
+      <div class="container">
+        <h1>AI Tone Adjuster</h1>
+        <p>
+          Rewrite text in a different tone using OpenAI. 
+          This demo runs via a secure serverless function.
+        </p>
+
+        <label for="toneSelect"><strong>Select tone</strong></label>
+        <select id="toneSelect" class="tone-select">
+          <option value="professional">Professional</option>
+          <option value="casual">Casual</option>
+          <option value="friendly">Friendly</option>
+          <option value="confident">Confident</option>
+          <option value="academic">Academic</option>
+        </select>
+
+        <textarea
+          id="toneInput"
+          class="tone-textarea"
+          placeholder="Paste text here..."
+          rows="6"
+        ></textarea>
+
+        <button class="cta-button" onclick="rewriteTone()">
+          Rewrite
+        </button>
+
+        <div id="toneOutput" class="tone-output"></div>
+      </div>
+    </section>
+  `;
+  }
 }
 
 // Initialize app
@@ -244,7 +281,8 @@ document.addEventListener('DOMContentLoaded', function () {
   const hash = window.location.hash.slice(1);
   const savedPage = localStorage.getItem('currentPage');
   // If no hash in URL, go to home (ignores localStorage)
-  const initialPage = hash || (window.location.hash === '' ? 'home' : savedPage) || 'home';
+  const initialPage =
+    hash || (window.location.hash === '' ? 'home' : savedPage) || 'home';
   router.navigate(initialPage);
 
   // Handle browser back/forward buttons
@@ -274,3 +312,33 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   });
 });
+
+async function rewriteTone() {
+  const text = document.getElementById('toneInput')?.value;
+  const tone = document.getElementById('toneSelect')?.value;
+  const output = document.getElementById('toneOutput');
+
+  if (!text || !text.trim()) {
+    output.textContent = 'Please enter some text.';
+    return;
+  }
+
+  output.textContent = 'Rewriting…';
+
+  try {
+    const apiEndpoint = typeof API_CONFIG !== 'undefined' 
+      ? API_CONFIG.REWRITE_ENDPOINT 
+      : '/.netlify/functions/rewrite';
+    
+    const response = await fetch(apiEndpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text, tone }),
+    });
+
+    const data = await response.json();
+    output.textContent = data.result || 'No response returned.';
+  } catch (err) {
+    output.textContent = 'Error contacting AI service.';
+  }
+}
