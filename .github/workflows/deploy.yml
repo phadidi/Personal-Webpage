@@ -52,6 +52,7 @@ jobs:
             --stack-name ${{ env.STACK_NAME }} \
             --parameter-overrides OpenAIApiKey=${{ secrets.OPENAI_API_KEY }} \
             --capabilities CAPABILITY_IAM \
+            --resolve-s3 \
             --no-confirm-changeset \
             --no-fail-on-empty-changeset
 
