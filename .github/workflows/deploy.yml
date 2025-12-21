@@ -45,6 +45,11 @@ jobs:
       - name: Setup SAM CLI
         uses: aws-actions/setup-sam@v2
 
+      - name: Clean up failed SAM stack
+        run: |
+          aws cloudformation delete-stack --stack-name aws-sam-cli-managed-default || true
+          aws cloudformation wait stack-delete-complete --stack-name aws-sam-cli-managed-default || true
+
       - name: Deploy Lambda and API Gateway
         id: sam-deploy
         run: |
