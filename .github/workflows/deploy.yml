@@ -54,7 +54,16 @@ jobs:
             --capabilities CAPABILITY_IAM \
             --resolve-s3 \
             --no-confirm-changeset \
-            --no-fail-on-empty-changeset
+            --no-fail-on-empty-changeset \
+            --debug 2>&1 | tee sam-deploy.log
+          
+          if [ $? -ne 0 ]; then
+            echo "SAM deploy failed. Checking CloudFormation events..."
+            aws cloudformation describe-stack-events \
+              --stack-name aws-sam-cli-managed-default \
+              --max-items 10 || true
+            exit 1
+          fi
 
       - name: Get API Endpoint
         id: api-endpoint
