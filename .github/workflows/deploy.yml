@@ -60,7 +60,14 @@ jobs:
             --capabilities CAPABILITY_IAM \
             --resolve-s3 \
             --no-confirm-changeset \
-            --no-fail-on-empty-changeset
+            --no-fail-on-empty-changeset || {
+              echo "SAM deploy failed. Checking stack events..."
+              aws cloudformation describe-stack-events \
+                --stack-name aws-sam-cli-managed-default \
+                --query 'StackEvents[?ResourceStatus==`CREATE_FAILED`].[LogicalResourceId,ResourceStatusReason]' \
+                --output table
+              exit 1
+            }
 
       - name: Get API Endpoint
         id: api-endpoint
