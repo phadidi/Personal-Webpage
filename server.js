@@ -14,8 +14,7 @@ const { handler } = require('./lambda/rewrite');
 const { handler: wordLadderInitHandler } = require('./netlify/functions/word-ladder-init');
 const { handler: wordLadderHandler } = require('./netlify/functions/word-ladder');
 
-// API endpoints (before static middleware)
-app.post('/api/rewrite', async (req, res) => {
+app.post('/.netlify/functions/rewrite', async (req, res) => {
   const event = {
     httpMethod: 'POST',
     body: JSON.stringify(req.body),
@@ -34,7 +33,11 @@ app.post('/api/rewrite', async (req, res) => {
 });
 
 app.get('/.netlify/functions/word-ladder-init', async (req, res) => {
-  const result = await wordLadderInitHandler();
+  const event = {
+    httpMethod: 'GET',
+    headers: req.headers,
+  };
+  const result = await wordLadderInitHandler(event);
   res.status(result.statusCode).send(result.body);
 });
 
