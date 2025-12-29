@@ -69,23 +69,28 @@ jobs:
             --no-confirm-changeset \
             --no-fail-on-empty-changeset
 
-      - name: Get API Endpoint
+      - name: Get API Endpoints
         id: api-endpoint
         if: success()
         run: |
-          API_URL=$(aws cloudformation describe-stacks \
+          API_BASE=$(aws cloudformation describe-stacks \
             --stack-name ${{ env.STACK_NAME }} \
             --query 'Stacks[0].Outputs[?OutputKey==`ApiEndpoint`].OutputValue' \
             --output text)
-          echo "API_URL=$API_URL" >> $GITHUB_OUTPUT
+          echo "API_BASE=$API_BASE" >> $GITHUB_OUTPUT
+          echo "REWRITE_URL=$API_BASE/rewrite" >> $GITHUB_OUTPUT
+          echo "WORD_LADDER_INIT_URL=$API_BASE/word-ladder-init" >> $GITHUB_OUTPUT
+          echo "WORD_LADDER_URL=$API_BASE/word-ladder" >> $GITHUB_OUTPUT
 
-      - name: Update script.js with API endpoint
+      - name: Update config.js with API endpoints
         run: |
-          sed -i "s|/.netlify/functions/rewrite|${{ steps.api-endpoint.outputs.API_URL }}|g" script.js
-
-      - name: Update config.js with API endpoint
-        run: |
-          echo "const API_CONFIG = { REWRITE_ENDPOINT: '${{ steps.api-endpoint.outputs.API_URL }}' };" > config.js
+          cat > config.js << EOF
+          const API_CONFIG = {
+            REWRITE_ENDPOINT: '${{ steps.api-endpoint.outputs.REWRITE_URL }}',
+            WORD_LADDER_INIT_ENDPOINT: '${{ steps.api-endpoint.outputs.WORD_LADDER_INIT_URL }}',
+            WORD_LADDER_ENDPOINT: '${{ steps.api-endpoint.outputs.WORD_LADDER_URL }}'
+          };
+          EOF
 
       # ----------------------------
       # Deploy static files to S3

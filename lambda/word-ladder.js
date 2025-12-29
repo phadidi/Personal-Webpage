@@ -9,7 +9,7 @@ exports.handler = async (event) => {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
   };
 
   if (event.httpMethod === 'OPTIONS') {
@@ -68,7 +68,9 @@ exports.handler = async (event) => {
       headers,
       body: JSON.stringify({
         valid: result.valid,
-        reason: result.valid ? 'Valid move!' : `${attemptUpper} is not a valid word`,
+        reason: result.valid
+          ? 'Valid move!'
+          : `${attemptUpper} is not a valid word`,
         hint: result.valid ? '' : 'Try a dictionary word',
       }),
     };
