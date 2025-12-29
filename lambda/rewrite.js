@@ -39,19 +39,21 @@ exports.handler = async function (event) {
       apiKey: process.env.OPENAI_API_KEY,
     });
 
-    const response = await client.responses.create({
-      model: 'gpt-5-nano',
-      input: `Rewrite the following text in a ${tone} tone. Keep the meaning and intent the same, but also make the language more concise.
-
-Text:
-${text}`,
+    const response = await client.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: [
+        {
+          role: 'user',
+          content: `Rewrite the following text in a ${tone} tone. Keep the meaning and intent the same, but also make the language more concise.\n\nText:\n${text}`
+        }
+      ],
     });
 
     return {
       statusCode: 200,
       headers,
       body: JSON.stringify({
-        result: response.output_text.trim(),
+        result: response.choices[0].message.content.trim(),
       }),
     };
   } catch (err) {

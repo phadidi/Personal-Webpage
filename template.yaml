@@ -27,20 +27,67 @@ Resources:
           Properties:
             Path: /rewrite
             Method: post
-            RestApiId: !Ref RewriteApi
+            RestApiId: !Ref ApiGateway
 
-  RewriteApi:
+  WordLadderInitFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: turquoisepenguin-word-ladder-init
+      Handler: word-ladder-init.handler
+      Runtime: nodejs18.x
+      CodeUri: lambda/
+      MemorySize: 256
+      Timeout: 30
+      Environment:
+        Variables:
+          OPENAI_API_KEY: !Ref OpenAIApiKey
+      Events:
+        WordLadderInitApi:
+          Type: Api
+          Properties:
+            Path: /word-ladder-init
+            Method: get
+            RestApiId: !Ref ApiGateway
+
+  WordLadderFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: turquoisepenguin-word-ladder
+      Handler: word-ladder.handler
+      Runtime: nodejs18.x
+      CodeUri: lambda/
+      MemorySize: 256
+      Timeout: 30
+      Environment:
+        Variables:
+          OPENAI_API_KEY: !Ref OpenAIApiKey
+      Events:
+        WordLadderApi:
+          Type: Api
+          Properties:
+            Path: /word-ladder
+            Method: post
+            RestApiId: !Ref ApiGateway
+
+  ApiGateway:
     Type: AWS::Serverless::Api
     Properties:
       StageName: prod
       Cors:
         AllowOrigin: "'*'"
         AllowHeaders: "'Content-Type'"
-        AllowMethods: "'POST,OPTIONS'"
+        AllowMethods: "'GET,POST,OPTIONS'"
 
 Outputs:
   ApiEndpoint:
     Description: API Gateway endpoint URL
-    Value: !Sub 'https://${RewriteApi}.execute-api.${AWS::Region}.amazonaws.com/prod/rewrite'
-    Export:
-      Name: RewriteApiEndpoint
+    Value: !Sub 'https://${ApiGateway}.execute-api.${AWS::Region}.amazonaws.com/prod'
+  RewriteEndpoint:
+    Description: Rewrite API endpoint
+    Value: !Sub 'https://${ApiGateway}.execute-api.${AWS::Region}.amazonaws.com/prod/rewrite'
+  WordLadderInitEndpoint:
+    Description: Word Ladder Init API endpoint
+    Value: !Sub 'https://${ApiGateway}.execute-api.${AWS::Region}.amazonaws.com/prod/word-ladder-init'
+  WordLadderEndpoint:
+    Description: Word Ladder API endpoint
+    Value: !Sub 'https://${ApiGateway}.execute-api.${AWS::Region}.amazonaws.com/prod/word-ladder'

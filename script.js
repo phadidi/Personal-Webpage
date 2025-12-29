@@ -7,6 +7,7 @@ class Router {
       resume: this.renderResume,
       contact: this.renderContact,
       tone: this.renderToneTips,
+      words: this.renderWords,
     };
     this.currentPage = 'home';
   }
@@ -244,8 +245,36 @@ class Router {
     </section>
   `;
   }
-}
 
+  renderWords() {
+    // Initialize word ladder after rendering
+    setTimeout(() => initWordLadder(), 0);
+    
+    return `
+    <section id="words" class="container">
+      <h2>AI Word Ladder</h2>
+      <p>Change one letter at a time to reach the target word.</p>
+
+      <div class="game-box">
+        <p><strong>Start:</strong> <span id="start-word"></span></p>
+        <p><strong>End:</strong> <span id="target-word"></span></p>
+        <p><strong>Current:</strong> <span id="current-word"></span></p>
+
+        <input
+          id="word-attempt"
+          type="text"
+          maxlength="4"
+          placeholder="Next word"
+        />
+
+        <button id="submit-word">Submit</button>
+
+        <p id="word-feedback"></p>
+      </div>
+    </section>
+  `;
+  }
+}
 // Initialize app
 const router = new Router();
 
@@ -326,10 +355,11 @@ async function rewriteTone() {
   output.textContent = 'Rewriting…';
 
   try {
-    const apiEndpoint = typeof API_CONFIG !== 'undefined' 
-      ? API_CONFIG.REWRITE_ENDPOINT 
-      : '/.netlify/functions/rewrite';
-    
+    const apiEndpoint =
+      typeof API_CONFIG !== 'undefined'
+        ? API_CONFIG.REWRITE_ENDPOINT
+        : '/.netlify/functions/rewrite';
+
     const response = await fetch(apiEndpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -342,3 +372,107 @@ async function rewriteTone() {
     output.textContent = 'Error contacting AI service.';
   }
 }
+
+// Word Ladder Logic
+
+// -----------------------------
+// AI Word Ladder (#words)
+// -----------------------------
+
+let currentWord = '';
+let targetWord = '';
+
+function initWordLadder() {
+  const submitBtn = document.getElementById('submit-word');
+  const input = document.getElementById('word-attempt');
+  if (!submitBtn) return;
+
+  submitBtn.addEventListener('click', handleWordLadderMove);
+  
+  // Add Enter key support
+  if (input) {
+    input.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        handleWordLadderMove();
+      }
+    });
+  }
+  
+  loadNewWordLadder();
+}
+
+async function loadNewWordLadder() {
+  const feedback = document.getElementById('word-feedback');
+
+  feedback.textContent = 'Generating puzzle...';
+
+  try {
+    const apiEndpoint = typeof API_CONFIG !== 'undefined' && API_CONFIG.WORD_LADDER_INIT_ENDPOINT
+      ? API_CONFIG.WORD_LADDER_INIT_ENDPOINT
+      : '/.netlify/functions/word-ladder-init';
+    
+    const res = await fetch(apiEndpoint);
+    const data = await res.json();
+
+    currentWord = data.start;
+    targetWord = data.end;
+
+    document.getElementById('current-word').textContent = currentWord;
+    document.getElementById('start-word').textContent = currentWord;
+    document.getElementById('target-word').textContent = targetWord;
+
+    feedback.textContent = '';
+  } catch (err) {
+    console.error(err);
+    feedback.textContent = '❌ Failed to load puzzle.';
+  }
+}
+
+async function handleWordLadderMove() {
+  const input = document.getElementById('word-attempt');
+  const feedback = document.getElementById('word-feedback');
+  const currentWordEl = document.getElementById('current-word');
+
+  const attempt = input.value.trim().toUpperCase();
+  if (!attempt) return;
+
+  feedback.textContent = 'Checking...';
+
+  try {
+    const apiEndpoint = typeof API_CONFIG !== 'undefined' && API_CONFIG.WORD_LADDER_ENDPOINT
+      ? API_CONFIG.WORD_LADDER_ENDPOINT
+      : '/.netlify/functions/word-ladder';
+    
+    const res = await fetch(apiEndpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        start: currentWord,
+        end: targetWord,
+        attempt,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (data.valid) {
+      currentWord = attempt;
+      currentWordEl.textContent = currentWord;
+      input.value = '';
+
+      feedback.textContent =
+        currentWord === targetWord
+          ? '🎉 You completed the ladder! Refresh for a new one.'
+          : '✅ Valid move!';
+    } else {
+      feedback.textContent = `❌ ${data.reason} Hint: ${data.hint}`;
+    }
+  } catch (err) {
+    console.error(err);
+    feedback.textContent = '❌ Error validating move.';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  // Don't init here - will be called by renderWords()
+});
