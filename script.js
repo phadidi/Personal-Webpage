@@ -249,7 +249,7 @@ class Router {
   renderWords() {
     // Initialize word ladder after rendering
     setTimeout(() => initWordLadder(), 0);
-    
+
     return `
     <section id="words" class="container">
       <h2>AI Word Ladder</h2>
@@ -263,7 +263,6 @@ class Router {
         <input
           id="word-attempt"
           type="text"
-          maxlength="4"
           placeholder="Next word"
         />
 
@@ -388,7 +387,7 @@ function initWordLadder() {
   if (!submitBtn) return;
 
   submitBtn.addEventListener('click', handleWordLadderMove);
-  
+
   // Add Enter key support
   if (input) {
     input.addEventListener('keypress', (e) => {
@@ -397,7 +396,7 @@ function initWordLadder() {
       }
     });
   }
-  
+
   loadNewWordLadder();
 }
 
@@ -407,12 +406,21 @@ async function loadNewWordLadder() {
   feedback.textContent = 'Generating puzzle...';
 
   try {
-    const apiEndpoint = typeof API_CONFIG !== 'undefined' && API_CONFIG.WORD_LADDER_INIT_ENDPOINT
-      ? API_CONFIG.WORD_LADDER_INIT_ENDPOINT
-      : '/.netlify/functions/word-ladder-init';
-    
+    const apiEndpoint =
+      typeof API_CONFIG !== 'undefined' && API_CONFIG.WORD_LADDER_INIT_ENDPOINT
+        ? API_CONFIG.WORD_LADDER_INIT_ENDPOINT
+        : '/.netlify/functions/word-ladder-init';
+
     const res = await fetch(apiEndpoint);
     const data = await res.json();
+
+    const wordAttemptInput = document.getElementById('word-attempt');
+
+    const length = data.start.length; // start & end are same length by design
+
+    wordAttemptInput.value = '';
+    wordAttemptInput.maxLength = length;
+    wordAttemptInput.placeholder = `Enter a ${length}-letter word`;
 
     currentWord = data.start;
     targetWord = data.end;
@@ -439,10 +447,11 @@ async function handleWordLadderMove() {
   feedback.textContent = 'Checking...';
 
   try {
-    const apiEndpoint = typeof API_CONFIG !== 'undefined' && API_CONFIG.WORD_LADDER_ENDPOINT
-      ? API_CONFIG.WORD_LADDER_ENDPOINT
-      : '/.netlify/functions/word-ladder';
-    
+    const apiEndpoint =
+      typeof API_CONFIG !== 'undefined' && API_CONFIG.WORD_LADDER_ENDPOINT
+        ? API_CONFIG.WORD_LADDER_ENDPOINT
+        : '/.netlify/functions/word-ladder';
+
     const res = await fetch(apiEndpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

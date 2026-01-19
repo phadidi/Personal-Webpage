@@ -4,7 +4,7 @@ const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-exports.handler = async function() {
+exports.handler = async function () {
   try {
     const prompt = `
 Generate a Word Ladder puzzle with RANDOM and VARIED words.

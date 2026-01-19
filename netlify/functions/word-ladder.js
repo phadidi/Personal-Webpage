@@ -4,7 +4,7 @@ const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-exports.handler = async function(event) {
+exports.handler = async function (event) {
   if (event.httpMethod !== 'POST') {
     return {
       statusCode: 405,
@@ -46,6 +46,20 @@ exports.handler = async function(event) {
       };
     }
 
+    // Allow reaching the goal word even if dictionary check fails
+    /*if (attemptUpper === end.toUpperCase()) {
+      return {
+        statusCode: 200,
+        ...(headers && { headers }),
+        body: JSON.stringify({
+          valid: true,
+          reason: 'You reached the goal!',
+          hint: '',
+          completed: true,
+        }),
+      };
+    }*/
+
     // Check if valid English word using AI
     const prompt = `Is "${attemptUpper}" a valid English word found in a standard dictionary? Answer yes if it's a real word that people use. Respond ONLY in JSON: {"valid": true or false}`;
 
@@ -61,7 +75,9 @@ exports.handler = async function(event) {
       statusCode: 200,
       body: JSON.stringify({
         valid: result.valid,
-        reason: result.valid ? 'Valid move!' : `${attemptUpper} is not a valid word`,
+        reason: result.valid
+          ? 'Valid move!'
+          : `${attemptUpper} is not a valid word`,
         hint: result.valid ? '' : 'Try a dictionary word',
       }),
     };
