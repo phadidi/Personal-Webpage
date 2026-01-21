@@ -17,15 +17,46 @@ exports.handler = async (event) => {
   }
 
   try {
-    const { start, end, attempt } = JSON.parse(event.body);
+    const { start, end, current, attempt } = JSON.parse(event.body);
     const startUpper = start.toUpperCase();
+    const endUpper = end.toUpperCase();
+    const currentUpper = current.toUpperCase();
     const attemptUpper = attempt.toUpperCase();
 
-    // Check if same length
-    if (startUpper.length !== attemptUpper.length) {
+    const alphaRegex = /^[A-Z]+$/;
+
+    if (
+      !alphaRegex.test(startUpper) ||
+      !alphaRegex.test(endUpper) ||
+      !alphaRegex.test(currentUpper) ||
+      !alphaRegex.test(attemptUpper)
+    ) {
       return {
         statusCode: 200,
-        headers,
+        ...(headers && { headers }),
+        body: JSON.stringify({
+          valid: false,
+          reason: 'Only A–Z letters are allowed',
+          hint: 'No numbers or symbols',
+        }),
+      };
+    }
+
+    if (startUpper.length !== endUpper.length) {
+      return {
+        statusCode: 400,
+        ...(headers && { headers }),
+        body: JSON.stringify({
+          error: 'Invalid puzzle: start and goal length mismatch',
+        }),
+      };
+    }
+
+    // Check if same length
+    if (attemptUpper.length !== startUpper.length) {
+      return {
+        statusCode: 200,
+        ...(headers && { headers }),
         body: JSON.stringify({
           valid: false,
           reason: 'Word must be same length',
@@ -34,38 +65,36 @@ exports.handler = async (event) => {
       };
     }
 
-    // Count differences
-    let differences = 0;
-    for (let i = 0; i < startUpper.length; i++) {
-      if (startUpper[i] !== attemptUpper[i]) differences++;
-    }
-
-    if (differences !== 1) {
-      return {
-        statusCode: 200,
-        headers,
-        body: JSON.stringify({
-          valid: false,
-          reason: 'Must change exactly ONE letter',
-          hint: `Change only one letter from ${startUpper}`,
-        }),
-      };
-    }
-
-    // Allow reaching the goal word even if dictionary check fails
-    /*if (attemptUpper === end.toUpperCase()) {
+    if (attemptUpper === endUpper) {
       return {
         statusCode: 200,
         ...(headers && { headers }),
         body: JSON.stringify({
           valid: true,
+          completed: true,
           reason: 'You reached the goal!',
           hint: '',
-          completed: true,
         }),
       };
-    }*/
+    }
 
+    // Count differences
+    let differences = 0;
+    for (let i = 0; i < currentUpper.length; i++) {
+      if (currentUpper[i] !== attemptUpper[i]) differences++;
+    }
+
+    if (differences !== 1) {
+      return {
+        statusCode: 200,
+        ...(headers && { headers }),
+        body: JSON.stringify({
+          valid: false,
+          reason: 'Must change exactly ONE letter',
+          hint: `Change only one letter from ${currentUpper}`,
+        }),
+      };
+    }
     // Check if valid English word using AI
     const prompt = `Is "${attemptUpper}" a valid English word found in a standard dictionary? Answer yes if it's a real word that people use. Respond ONLY in JSON: {"valid": true or false}`;
 

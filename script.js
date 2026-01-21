@@ -398,6 +398,11 @@ function initWordLadder() {
   }
 
   loadNewWordLadder();
+  while (startWord.length !== targetWord.length) {
+    alert('Invalid puzzle generated. Reloading...');
+    loadNewWordLadder();
+    return;
+  }
 }
 
 async function loadNewWordLadder() {
@@ -422,11 +427,12 @@ async function loadNewWordLadder() {
     wordAttemptInput.maxLength = length;
     wordAttemptInput.placeholder = `Enter a ${length}-letter word`;
 
-    currentWord = data.start;
+    startWord = data.start;
+    currentWord = data.start; // ✅ always initialize current to start
     targetWord = data.end;
 
     document.getElementById('current-word').textContent = currentWord;
-    document.getElementById('start-word').textContent = currentWord;
+    document.getElementById('start-word').textContent = startWord;
     document.getElementById('target-word').textContent = targetWord;
 
     feedback.textContent = '';
@@ -456,9 +462,10 @@ async function handleWordLadderMove() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        start: currentWord,
+        start: startWord,
+        current: currentWord,
         end: targetWord,
-        attempt,
+        attempt: attempt,
       }),
     });
 

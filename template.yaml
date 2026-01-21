@@ -1,4 +1,4 @@
-AWSTemplateFormatVersion: '2010-09-09'
+AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
 Description: Rewrite Lambda Function with API Gateway
 
@@ -14,7 +14,7 @@ Resources:
     Properties:
       FunctionName: turquoisepenguin-rewrite
       Handler: rewrite.handler
-      Runtime: nodejs18.x
+      Runtime: nodejs20.x
       CodeUri: lambda/
       MemorySize: 256
       Timeout: 30
@@ -34,7 +34,7 @@ Resources:
     Properties:
       FunctionName: turquoisepenguin-word-ladder-init
       Handler: word-ladder-init.handler
-      Runtime: nodejs18.x
+      Runtime: nodejs20.x
       CodeUri: lambda/
       MemorySize: 256
       Timeout: 30
@@ -54,7 +54,7 @@ Resources:
     Properties:
       FunctionName: turquoisepenguin-word-ladder
       Handler: word-ladder.handler
-      Runtime: nodejs18.x
+      Runtime: nodejs20.x
       CodeUri: lambda/
       MemorySize: 256
       Timeout: 30
@@ -81,13 +81,13 @@ Resources:
 Outputs:
   ApiEndpoint:
     Description: API Gateway endpoint URL
-    Value: !Sub 'https://${ApiGateway}.execute-api.${AWS::Region}.amazonaws.com/prod'
+    Value: !Sub "https://${ApiGateway}.execute-api.${AWS::Region}.amazonaws.com/prod"
   RewriteEndpoint:
     Description: Rewrite API endpoint
-    Value: !Sub 'https://${ApiGateway}.execute-api.${AWS::Region}.amazonaws.com/prod/rewrite'
+    Value: !Sub "https://${ApiGateway}.execute-api.${AWS::Region}.amazonaws.com/prod/rewrite"
   WordLadderInitEndpoint:
     Description: Word Ladder Init API endpoint
-    Value: !Sub 'https://${ApiGateway}.execute-api.${AWS::Region}.amazonaws.com/prod/word-ladder-init'
+    Value: !Sub "https://${ApiGateway}.execute-api.${AWS::Region}.amazonaws.com/prod/word-ladder-init"
   WordLadderEndpoint:
     Description: Word Ladder API endpoint
-    Value: !Sub 'https://${ApiGateway}.execute-api.${AWS::Region}.amazonaws.com/prod/word-ladder'
+    Value: !Sub "https://${ApiGateway}.execute-api.${AWS::Region}.amazonaws.com/prod/word-ladder"

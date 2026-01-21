@@ -13,12 +13,32 @@ exports.handler = async function (event) {
   }
 
   try {
-    const { start, end, attempt } = JSON.parse(event.body);
+    const { start, end, current, attempt } = JSON.parse(event.body);
     const startUpper = start.toUpperCase();
+    const endUpper = end.toUpperCase();
+    const currentUpper = current.toUpperCase();
     const attemptUpper = attempt.toUpperCase();
 
+    const alphaRegex = /^[A-Z]+$/;
+
+    if (
+      !alphaRegex.test(startUpper) ||
+      !alphaRegex.test(endUpper) ||
+      !alphaRegex.test(currentUpper) ||
+      !alphaRegex.test(attemptUpper)
+    ) {
+      return {
+        statusCode: 200,
+        body: JSON.stringify({
+          valid: false,
+          reason: 'Only A–Z letters are allowed',
+          hint: 'No numbers or symbols',
+        }),
+      };
+    }
+
     // Check if same length
-    if (startUpper.length !== attemptUpper.length) {
+    if (attemptUpper.length !== startUpper.length) {
       return {
         statusCode: 200,
         body: JSON.stringify({
@@ -29,10 +49,22 @@ exports.handler = async function (event) {
       };
     }
 
+    if (attemptUpper === endUpper) {
+      return {
+        statusCode: 200,
+        body: JSON.stringify({
+          valid: true,
+          completed: true,
+          reason: 'You reached the goal!',
+          hint: '',
+        }),
+      };
+    }
+
     // Count differences
     let differences = 0;
-    for (let i = 0; i < startUpper.length; i++) {
-      if (startUpper[i] !== attemptUpper[i]) differences++;
+    for (let i = 0; i < currentUpper.length; i++) {
+      if (currentUpper[i] !== attemptUpper[i]) differences++;
     }
 
     if (differences !== 1) {
@@ -41,25 +73,10 @@ exports.handler = async function (event) {
         body: JSON.stringify({
           valid: false,
           reason: 'Must change exactly ONE letter',
-          hint: `Change only one letter from ${startUpper}`,
+          hint: `Change only one letter from ${currentUpper}`,
         }),
       };
     }
-
-    // Allow reaching the goal word even if dictionary check fails
-    /*if (attemptUpper === end.toUpperCase()) {
-      return {
-        statusCode: 200,
-        ...(headers && { headers }),
-        body: JSON.stringify({
-          valid: true,
-          reason: 'You reached the goal!',
-          hint: '',
-          completed: true,
-        }),
-      };
-    }*/
-
     // Check if valid English word using AI
     const prompt = `Is "${attemptUpper}" a valid English word found in a standard dictionary? Answer yes if it's a real word that people use. Respond ONLY in JSON: {"valid": true or false}`;
 
