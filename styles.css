@@ -667,6 +667,50 @@ body:not([data-theme]) .moon-icon {
   font-weight: 600;
 }
 
+/* Dropdown Menu */
+.dropdown {
+  position: relative;
+}
+
+.dropdown-toggle {
+  cursor: pointer;
+}
+
+.dropdown-menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: var(--bg-color);
+  box-shadow: var(--shadow);
+  border-radius: 8px;
+  padding: 0.5rem 0;
+  min-width: 180px;
+  list-style: none;
+  z-index: 1000;
+}
+
+.dropdown:hover .dropdown-menu {
+  display: block;
+}
+
+.dropdown-menu li {
+  padding: 0;
+}
+
+.dropdown-menu a {
+  display: block;
+  padding: 0.75rem 1.5rem;
+  color: var(--text-color);
+  text-decoration: none;
+  transition: background-color 0.3s ease;
+}
+
+.dropdown-menu a:hover {
+  background-color: var(--card-bg);
+  color: var(--primary-color);
+}
+
 /* Responsive Design */
 @media (min-width: 1200px) {
   .hero {
@@ -722,6 +766,25 @@ body:not([data-theme]) .moon-icon {
 
   .nav-menu.active {
     display: flex;
+  }
+
+  .dropdown-menu {
+    position: static;
+    box-shadow: none;
+    padding-left: 1rem;
+    background-color: transparent;
+  }
+
+  .dropdown:hover .dropdown-menu {
+    display: none;
+  }
+
+  .dropdown.active .dropdown-menu {
+    display: block;
+  }
+
+  .dropdown-menu a {
+    padding: 0.5rem 1rem;
   }
 
   .nav-container {

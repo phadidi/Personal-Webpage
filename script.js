@@ -330,6 +330,17 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
+  // Dropdown toggle for mobile
+  document.addEventListener('click', function (e) {
+    if (e.target.classList.contains('dropdown-toggle')) {
+      e.preventDefault();
+      const dropdown = e.target.closest('.dropdown');
+      if (window.innerWidth <= 768) {
+        dropdown.classList.toggle('active');
+      }
+    }
+  });
+
   // Make contact-method divs clickable
   document.addEventListener('click', function (e) {
     const contactMethod = e.target.closest('.contact-method');
