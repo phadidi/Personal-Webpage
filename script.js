@@ -96,6 +96,7 @@ class Router {
                                 <span class="skill-tag">Blazor</span>
                                 <span class="skill-tag">REST APIs</span>
                                 <span class="skill-tag">SQL</span>
+                                <span class="skill-tag">Entity Framework ORM</span>
                                 <span class="skill-tag">AWS</span>
                                 <span class="skill-tag">React</span>
                                 <span class="skill-tag">JavaScript</span>
@@ -113,7 +114,7 @@ class Router {
             <section class="page-content resume-page">
                 <h1>My Resume</h1>
                 <div class="pdf-download">
-                    <a href="assets/documents/Parsa Hadidi Resume 2025.pdf" download class="pdf-link">📄 Download PDF Version</a>
+                    <a href="assets/documents/Parsa Hadidi Resume 2026.pdf" download class="pdf-link">📄 Download PDF Version</a>
                 </div>
                 <div class="resume-content">
                     <div class="resume-section">
@@ -133,7 +134,7 @@ class Router {
                                     <p class="company">Prime Therapeutics • January 2024 – Present</p>
                                     <p class="location">US, Minnesota, Eagan • Remote</p>
                                     <ul>
-                                        <li>Development & enhancement of frontend screens and backend API endpoints & microservices in physician letter review web applications using C#, Blazor, & ASP.NET with GitHub version control & GitHub Actions CI/CD</li>
+                                        <li>•	Development & enhancement of frontend screens and backend API endpoints & microservices in physician letter review web applications using C#, Blazor, MySQL, Entity Framework ORM, & ASP.NET with GitHub version control & GitHub Actions CI/CD</li>
                                         <li>Development & enhancement of SnapLogic pipelines to automate system maintenance and data retrieval processes across Amazon RDS SQL Server & MySQL databases, REST APIs, and Amazon S3 storage</li>
                                         <li>Enhancement & maintenance of SQL Stored Procedure intermediaries for REST APIs & AWS Lambda functions for reading & processing customer health data across multiple clients</li>
                                         <li>Development & usage of unit and integration test cases for applications hosted on Amazon EC2 Linux environments</li>
