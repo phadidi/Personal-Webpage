@@ -120,8 +120,8 @@ class Router {
                     <div class="resume-section">
                         <h2>Skills</h2>
                         <ul class="skills-list">
-                            <li>C#, Blazor, ASP.NET, SQL Stored Procedures, REST APIs, SnapLogic</li>
-                            <li>React, JavaScript, Node.js, AWS, Serverless, TypeScript, NoSQL</li>
+                            <li>C#, Blazor, ASP.NET, Entity Framework, SQL Stored Procedures, REST APIs, SnapLogic</li>
+                            <li>React, JavaScript, Node.js, AWS, Serverless, TypeScript, NoSQL, HTML</li>
                             <li>Java, XML, XSLT, PowerShell</li>
                             <li>GitHub Actions, Visual Studio, Agile Scrum, Unit Testing, Jest, Spring Boot, WSO2, React Native, Figma, Splunk</li>
                         </ul>
@@ -134,7 +134,7 @@ class Router {
                                     <p class="company">Prime Therapeutics • January 2024 – Present</p>
                                     <p class="location">US, Minnesota, Eagan • Remote</p>
                                     <ul>
-                                        <li>•	Development & enhancement of frontend screens and backend API endpoints & microservices in physician letter review web applications using C#, Blazor, MySQL, Entity Framework ORM, & ASP.NET with GitHub version control & GitHub Actions CI/CD</li>
+                                        <li>Development & enhancement of frontend screens and backend API endpoints & microservices in physician letter review web applications using C#, Blazor, MySQL, Entity Framework ORM, & ASP.NET with GitHub version control & GitHub Actions CI/CD</li>
                                         <li>Development & enhancement of SnapLogic pipelines to automate system maintenance and data retrieval processes across Amazon RDS SQL Server & MySQL databases, REST APIs, and Amazon S3 storage</li>
                                         <li>Enhancement & maintenance of SQL Stored Procedure intermediaries for REST APIs & AWS Lambda functions for reading & processing customer health data across multiple clients</li>
                                         <li>Development & usage of unit and integration test cases for applications hosted on Amazon EC2 Linux environments</li>
